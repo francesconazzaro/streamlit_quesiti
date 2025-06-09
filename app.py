@@ -16,7 +16,7 @@ def load_data(what):
 
 def load_question():
     st.session_state.dataset = load_data(st.session_state.dataset_name.lower())
-    st.session_state.current_index = random.randint(0, len(st.session_state.dataset) - 1)
+    # st.session_state.current_index = random.randint(0, len(st.session_state.dataset) - 1)
     st.session_state.options = None
     st.session_state.answered = False
     st.session_state.correct = None
@@ -35,8 +35,15 @@ def load_question():
     st.session_state.options = options
 
 def next_question():
+    print("Indice precedente:", st.session_state.current_index)
+    st.session_state.current_index = st.session_state.current_index + 1
+    print("Indice corrente:", st.session_state.current_index)
     load_question()
     st.rerun()
+
+
+def update_index():
+    st.session_state.current_index = int(st.session_state.index_input) - 2
 
 
 istruttori = load_data("istruttori")
@@ -48,14 +55,17 @@ st.session_state.dataset_name = st.selectbox(
     on_change=load_question,
 )
 
+index = int(st.text_input("Da dove vuoi iniziare?", 1, on_change=update_index, key="index_input"))
+if "current_index" not in st.session_state:
+    st.session_state.current_index = index - 2
 # if st.button("🔄 Ricarica domande"):
 # dataset = load_data(dataset_name.lower())
 
 letters = ["A", "B", "C"]
 # Inizializza lo stato della sessione
-if "current_index" not in st.session_state:
+if "options" not in st.session_state:
     st.session_state.dataset = load_data(st.session_state.dataset_name.lower())
-    st.session_state.current_index = random.randint(0, len(st.session_state.dataset) - 1)
+    # st.session_state.current_index = random.randint(0, len(st.session_state.dataset) - 1)
     st.session_state.options = None
     st.session_state.answered = False
     st.session_state.correct = None
