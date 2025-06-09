@@ -14,11 +14,8 @@ def load_data(what):
     )
 
 
-def load_dataset():
+def load_question():
     st.session_state.dataset = load_data(st.session_state.dataset_name.lower())
-
-def next_question():
-    load_dataset()
     st.session_state.current_index = random.randint(0, len(st.session_state.dataset) - 1)
     st.session_state.options = None
     st.session_state.answered = False
@@ -36,6 +33,9 @@ def next_question():
     st.session_state.C = row.C
     st.session_state.answer = row.A
     st.session_state.options = options
+
+def next_question():
+    load_question()
     st.rerun()
 
 
@@ -45,7 +45,7 @@ funzionari = load_data("funzionari")
 st.session_state.dataset_name = st.selectbox(
     "Seleziona il tipo di domanda",
     options=["Istruttori", "Funzionari"],
-    on_change=load_dataset,
+    on_change=load_question,
 )
 
 # if st.button("🔄 Ricarica domande"):
