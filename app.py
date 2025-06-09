@@ -51,7 +51,7 @@ st.session_state.dataset_name = st.selectbox(
 letters = ["A", "B", "C"]
 # Inizializza lo stato della sessione
 if "current_index" not in st.session_state:
-    st.session_state.dataset = load_data(st.session_state.dataset_name)
+    st.session_state.dataset = load_data(st.session_state.dataset_name.lower())
     st.session_state.current_index = random.randint(0, len(st.session_state.dataset) - 1)
     st.session_state.options = None
     st.session_state.answered = False
