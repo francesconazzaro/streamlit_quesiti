@@ -14,28 +14,6 @@ def load_data(what):
     )
 
 
-istruttori = load_data("istruttori")
-funzionari = load_data("funzionari")
-
-st.session_state.dataset_name = st.selectbox(
-    "Seleziona il tipo di domanda",
-    options=["Istruttori", "Funzionari"],
-    on_change=next_question,
-)
-
-# if st.button("🔄 Ricarica domande"):
-# dataset = load_data(dataset_name.lower())
-
-letters = ["A", "B", "C"]
-# Inizializza lo stato della sessione
-if "current_index" not in st.session_state:
-    st.session_state.dataset = load_data(st.session_state.dataset_name)
-    st.session_state.current_index = random.randint(0, len(st.session_state.dataset) - 1)
-    st.session_state.options = None
-    st.session_state.answered = False
-    st.session_state.correct = None
-
-
 def next_question():
     st.session_state.dataset = load_data(st.session_state.dataset_name)
     st.session_state.current_index = random.randint(0, len(st.session_state.dataset) - 1)
@@ -56,6 +34,28 @@ def next_question():
     st.session_state.answer = row.A
     st.session_state.options = options
     st.rerun()
+
+
+istruttori = load_data("istruttori")
+funzionari = load_data("funzionari")
+
+st.session_state.dataset_name = st.selectbox(
+    "Seleziona il tipo di domanda",
+    options=["Istruttori", "Funzionari"],
+    on_change=next_question,
+)
+
+# if st.button("🔄 Ricarica domande"):
+# dataset = load_data(dataset_name.lower())
+
+letters = ["A", "B", "C"]
+# Inizializza lo stato della sessione
+if "current_index" not in st.session_state:
+    st.session_state.dataset = load_data(st.session_state.dataset_name)
+    st.session_state.current_index = random.randint(0, len(st.session_state.dataset) - 1)
+    st.session_state.options = None
+    st.session_state.answered = False
+    st.session_state.correct = None
 
 
 # Imposta le opzioni mescolate solo se non sono già state impostate per questa domanda
