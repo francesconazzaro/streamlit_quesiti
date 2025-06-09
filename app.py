@@ -18,7 +18,7 @@ def load_dataset():
     st.session_state.dataset = load_data(st.session_state.dataset_name.lower())
 
 def next_question():
-    load_dataset(st.session_state.dataset_name.lower())
+    load_dataset()
     st.session_state.current_index = random.randint(0, len(st.session_state.dataset) - 1)
     st.session_state.options = None
     st.session_state.answered = False
