@@ -34,6 +34,15 @@ def load_question():
     st.session_state.answer = row.A
     st.session_state.options = options
 
+
+def back_question():
+    print("Indice precedente:", st.session_state.current_index)
+    st.session_state.current_index = st.session_state.current_index - 1
+    print("Indice corrente:", st.session_state.current_index)
+    load_question()
+    st.rerun()
+
+
 def next_question():
     print("Indice precedente:", st.session_state.current_index)
     st.session_state.current_index = st.session_state.current_index + 1
@@ -110,6 +119,8 @@ if selected and not st.session_state.answered:
             f"❌ Risposta sbagliata. Quella corretta era: **{letters[st.session_state.options.index('A')]}**: {st.session_state.answer}"
         )
 
-# Bottone per la prossima domanda
-if st.button("➡️ Prossima domanda"):
+left, right = st.columns(2)
+if left.button("⬅️ Domanda precedente"):
+    back_question()
+if right.button("➡️ Prossima domanda"):
     next_question()
