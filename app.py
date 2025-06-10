@@ -52,6 +52,7 @@ funzionari = load_data("funzionari")
 st.session_state.dataset_name = st.segmented_control(
     "Seleziona il tipo di domanda",
     options=["Istruttori", "Funzionari"],
+    default="Istruttori",
     on_change=load_question,
 )
 index = st.select_slider("Da dove vuoi iniziare?", options=range(1, 2500), value=1, on_change=update_index, key="index_input")
