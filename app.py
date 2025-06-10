@@ -54,8 +54,8 @@ st.session_state.dataset_name = st.selectbox(
     options=["Istruttori", "Funzionari"],
     on_change=load_question,
 )
-
-index = int(st.text_input("Da dove vuoi iniziare?", 1, on_change=update_index, key="index_input"))
+index = st.select_slider("Da dove vuoi iniziare?", options=list(range(1, 2500)), value=1, on_change=update_index, key="index_input")
+# index = int(st.text_input("Da dove vuoi iniziare?", 1, on_change=update_index, key="index_input"))
 if "current_index" not in st.session_state:
     st.session_state.current_index = index - 2
 # if st.button("🔄 Ricarica domande"):
