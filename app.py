@@ -1,17 +1,20 @@
-import streamlit as st
-import pandas as pd
+import os
+import pickle
 import random
 
-import pickle
+import pandas as pd
+import streamlit as st
 
 
-# Carica il file CSV o qualsiasi altra fonte
+BASE_DIR = os.getenv("BASE_DIR", "/root")
+
+
 @st.cache_data
 def load_data(what):
     # Sostituisci con il tuo percorso
     return pickle.load(
         # open(f"/Users/francesconazzaro/Downloads/quesiti_{what}.pk", "rb")
-        open(f"/root/quesiti_{what}.pk", "rb")
+        open(os.path.join(BASE_DIR, f"quesiti_{what}.pk"), "rb")
     )
 
 
@@ -22,7 +25,6 @@ def load_question():
     st.session_state.answered = False
     st.session_state.correct = None
 
-    # Genera una nuova sequenza mescolata delle opzioni
     row = st.session_state.dataset.iloc[st.session_state.current_index]
     options = letters.copy()
     random.shuffle(options)
@@ -37,17 +39,13 @@ def load_question():
 
 
 def back_question():
-    print("Indice precedente:", st.session_state.current_index)
     st.session_state.current_index = st.session_state.current_index - 1
-    print("Indice corrente:", st.session_state.current_index)
     load_question()
     st.rerun()
 
 
 def next_question():
-    print("Indice precedente:", st.session_state.current_index)
     st.session_state.current_index = st.session_state.current_index + 1
-    print("Indice corrente:", st.session_state.current_index)
     load_question()
     st.rerun()
 
@@ -65,7 +63,13 @@ st.session_state.dataset_name = st.segmented_control(
     default="Istruttori",
     on_change=load_question,
 )
-index = st.select_slider("Da dove vuoi iniziare?", options=range(1, 2500), value=1, on_change=update_index, key="index_input")
+index = st.select_slider(
+    "Da dove vuoi iniziare?",
+    options=range(1, 2500),
+    value=1,
+    on_change=update_index,
+    key="index_input",
+)
 letters = ["A", "B", "C"]
 if st.button("🔄 Ricarica domande"):
     st.session_state.current_index = index - 2
@@ -76,7 +80,6 @@ if "current_index" not in st.session_state:
 # if st.button("🔄 Ricarica domande"):
 # dataset = load_data(dataset_name.lower())
 
-# Inizializza lo stato della sessione
 if "options" not in st.session_state:
     st.session_state.dataset = load_data(st.session_state.dataset_name.lower())
     # st.session_state.current_index = random.randint(0, len(st.session_state.dataset) - 1)
@@ -85,17 +88,14 @@ if "options" not in st.session_state:
     st.session_state.correct = None
 
 
-# Imposta le opzioni mescolate solo se non sono già state impostate per questa domanda
 if st.session_state.options is None:
     next_question()
 
-# Interfaccia utente
 st.markdown(f"## Concorso: {st.session_state.dataset_name}")
 st.markdown(f"### Materia: {st.session_state.materia}")
 st.markdown(f"**Domanda {st.session_state.numero}:**")
 st.text(f"{st.session_state.domanda}")
 
-# Mostra le opzioni
 labels = {
     letter: st.session_state.get(option)
     for letter, option in zip(letters, st.session_state.options)
@@ -106,12 +106,11 @@ selected = st.radio(
     index=None,
     disabled=st.session_state.answered,
 )
-print("Hai selezionato:", selected)
-# Valutazione della risposta
+
 if selected and not st.session_state.answered:
     answer = selected.split(":")[1]
     st.session_state.answered = True
-    if answer.strip() == st.session_state.answer.strip():
+    if answer.strip().lower() == st.session_state.answer.strip().lower():
         st.session_state.correct = True
         st.success("✅ Risposta corretta!")
     else:
