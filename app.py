@@ -10,8 +10,8 @@ import pickle
 def load_data(what):
     # Sostituisci con il tuo percorso
     return pickle.load(
-        open(f"/Users/francesconazzaro/Downloads/quesiti_{what}.pk", "rb")
-        # open(f"/root/quesiti_{what}.pk", "rb")
+        # open(f"/Users/francesconazzaro/Downloads/quesiti_{what}.pk", "rb")
+        open(f"/root/quesiti_{what}.pk", "rb")
     )
 
 
