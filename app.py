@@ -78,7 +78,8 @@ if st.session_state.options is None:
 # Interfaccia utente
 st.markdown(f"## Concorso: {st.session_state.dataset_name}")
 st.markdown(f"### Materia: {st.session_state.materia}")
-st.markdown(f"**{st.session_state.numero} Domanda:** {st.session_state.domanda}")
+st.markdown(f"**Domanda {st.session_state.numero}:**")
+st.text(f"{st.session_state.domanda}")
 
 # Mostra le opzioni
 labels = {
