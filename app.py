@@ -56,6 +56,7 @@ st.session_state.dataset_name = st.segmented_control(
     on_change=load_question,
 )
 index = st.select_slider("Da dove vuoi iniziare?", options=range(1, 2500), value=1, on_change=update_index, key="index_input")
+letters = ["A", "B", "C"]
 if st.button("🔄 Ricarica domande"):
     st.session_state.current_index = index - 2
     load_question()
@@ -65,7 +66,6 @@ if "current_index" not in st.session_state:
 # if st.button("🔄 Ricarica domande"):
 # dataset = load_data(dataset_name.lower())
 
-letters = ["A", "B", "C"]
 # Inizializza lo stato della sessione
 if "options" not in st.session_state:
     st.session_state.dataset = load_data(st.session_state.dataset_name.lower())
