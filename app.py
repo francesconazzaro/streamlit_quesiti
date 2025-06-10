@@ -10,7 +10,8 @@ import pickle
 def load_data(what):
     # Sostituisci con il tuo percorso
     return pickle.load(
-        open(f"/root/quesiti_{what}.pk", "rb")
+        open(f"/Users/francesconazzaro/Downloads/quesiti_{what}.pk", "rb")
+        # open(f"/root/quesiti_{what}.pk", "rb")
     )
 
 
@@ -67,11 +68,11 @@ st.session_state.dataset_name = st.segmented_control(
 index = st.select_slider("Da dove vuoi iniziare?", options=range(1, 2500), value=1, on_change=update_index, key="index_input")
 letters = ["A", "B", "C"]
 if st.button("🔄 Ricarica domande"):
-    st.session_state.current_index = 0
+    st.session_state.current_index = index - 2
     load_question()
 
 if "current_index" not in st.session_state:
-    st.session_state.current_index = -1
+    st.session_state.current_index = index - 2
 # if st.button("🔄 Ricarica domande"):
 # dataset = load_data(dataset_name.lower())
 
