@@ -1,79 +1,62 @@
-import os
-import pickle
-import random
-
-import pandas as pd
 import streamlit as st
 
-
-BASE_DIR = os.getenv("BASE_DIR", "/root")
-
-
-@st.cache_data
-def load_data(what):
-    # Sostituisci con il tuo percorso
-    return pickle.load(
-        open(os.path.join(BASE_DIR, f"quesiti_{what}.pk"), "rb")
-    )
-
-
-def load_question():
-    st.session_state.dataset = load_data(st.session_state.dataset_name.lower())
-    # st.session_state.current_index = random.randint(0, len(st.session_state.dataset) - 1)
-    st.session_state.options = None
-    st.session_state.answered = False
-    st.session_state.correct = None
-
-    if st.session_state.materia_scelta != "Tutte le materie":
-        st.session_state.dataset = st.session_state.dataset[
-            st.session_state.dataset["MATERIA"] == st.session_state.materia_scelta
-        ]
-    row = st.session_state.dataset.iloc[st.session_state.current_index]
-    options = letters.copy()
-    random.shuffle(options)
-    st.session_state.domanda = row["DOMANDA"]
-    st.session_state.numero = row["NUMERO"]
-    st.session_state.materia = row["MATERIA"]
-    st.session_state.A = row.A
-    st.session_state.B = row.B
-    st.session_state.C = row.C
-    st.session_state.answer = row.A
-    st.session_state.options = options
-
-
-def back_question():
-    st.session_state.current_index = st.session_state.current_index - 1
-    load_question()
-    st.rerun()
-
-
-def next_question():
-    st.session_state.current_index = st.session_state.current_index + 1
-    load_question()
-    st.rerun()
+import utils
+import study
 
 
 def update_index():
     st.session_state.current_index = int(st.session_state.index_input) - 2
 
 
-istruttori = load_data("istruttori")
-funzionari = load_data("funzionari")
+istruttori = utils.load_data("istruttori")
+funzionari = utils.load_data("funzionari")
+
+mode = st.sidebar.segmented_control("Modalità", options=["Studio", "Esame"], default="Studio")
+randomize = st.sidebar.checkbox("Randomizza le domande")
+
+if st.session_state.get("current_index") is None:
+    print("Initializing session state")
+    st.session_state.current_index = 0
+    st.session_state.answered = False
+    st.session_state.correct = None
+    st.session_state.options = utils.LETTERS.copy()
+    st.session_state.number_of_questions = 0
+    st.session_state.number_of_corrects = 0
 
 left, right = st.columns(2)
-st.session_state.dataset_name = left.segmented_control(
+dataset_name = left.segmented_control(
     "Seleziona il tipo Concorso",
     options=["Istruttori", "Funzionari"],
     default="Istruttori",
-    on_change=load_question,
 )
 
-dataset = load_data(st.session_state.dataset_name.lower())
-materia_options = dataset["MATERIA"].unique().tolist()
-st.session_state.materia_scelta = right.selectbox(
+if dataset_name == "Istruttori":
+    subjects = study.Exam(
+        dataset=istruttori,
+        dataset_name=dataset_name,
+        current_index=st.session_state.current_index,
+    )
+elif dataset_name == "Funzionari":
+    subjects = study.Exam(
+        dataset=funzionari,
+        dataset_name=dataset_name,
+        current_index=st.session_state.current_index,
+    )
+
+subject = st.session_state.materia_scelta = right.selectbox(
     "Seleziona la materia",
-    options=["Tutte le materie"] + materia_options,
+    options=["Tutte le materie"] + subjects.get_list_of_subjects(),
     index=0,
+)
+
+print(subject)
+
+exam = study.Exam(
+    dataset=subjects.dataset,
+    dataset_name=subjects.dataset_name,
+    current_index=st.session_state.current_index,
+    subject=subject,
+    randomize=randomize,
 )
 
 index = st.select_slider(
@@ -83,34 +66,34 @@ index = st.select_slider(
     on_change=update_index,
     key="index_input",
 )
+
 letters = ["A", "B", "C"]
-if st.button("🔄 Ricarica domande"):
-    st.session_state.current_index = index - 1
-    load_question()
-
-if "current_index" not in st.session_state:
-    st.session_state.current_index = index - 1
 # if st.button("🔄 Ricarica domande"):
-# dataset = load_data(dataset_name.lower())
+#     st.session_state.current_index = index - 1
+#     exam.reload_questions(st.session_state)
 
-if "options" not in st.session_state:
-    st.session_state.dataset = load_data(st.session_state.dataset_name.lower())
-    # st.session_state.current_index = random.randint(0, len(st.session_state.dataset) - 1)
-    st.session_state.options = None
-    st.session_state.answered = False
-    st.session_state.correct = None
+if mode == "Esame":
+    if (
+        st.session_state.number_of_questions
+        and st.session_state.number_of_corrects / st.session_state.number_of_questions
+        > 0.7
+    ):
+        color = "green"
+    else:
+        color = "red"
+    result = f":{color}[{st.session_state.number_of_corrects} / {st.session_state.number_of_questions}]"
+else:
+    result = ""
 
-
-if st.session_state.options is None:
-    next_question()
-
-st.markdown(f"## Concorso: {st.session_state.dataset_name}")
-st.markdown(f"### Materia: {st.session_state.materia}")
-st.markdown(f"**Domanda {st.session_state.numero}:**")
-st.text(f"{st.session_state.domanda}")
+left, right = st.columns(2)
+left.markdown(f"## Concorso: {exam.dataset_name}")
+right.markdown(f"## {result}")
+st.markdown(f"### Materia: {exam.materia}")
+st.markdown(f"**Domanda {exam.numero}:**")
+st.text(f"{exam.domanda}")
 
 labels = {
-    letter: st.session_state.get(option)
+    letter: getattr(exam, option)
     for letter, option in zip(letters, st.session_state.options)
 }
 selected = st.radio(
@@ -120,23 +103,30 @@ selected = st.radio(
     disabled=st.session_state.answered,
 )
 
+print(selected)
+
 if selected and not st.session_state.answered:
     answer = selected.split(":")[1]
     st.session_state.answered = True
-    if answer.strip().lower() == st.session_state.answer.strip().lower():
-        st.session_state.correct = True
+    print(f"Selected answer: {answer}, {st.session_state.answered}")
+    if answer.strip().lower() == exam.answer.strip().lower():
+        exam.correct(st.session_state)
         st.success("✅ Risposta corretta!")
     else:
-        st.session_state.correct = False
+        exam.wrong(st.session_state)
         st.error(
-            f"❌ Risposta sbagliata. Quella corretta era: **{letters[st.session_state.options.index('A')]}**: {st.session_state.answer}"
+            f"❌ Risposta sbagliata. Quella corretta era: **{letters[st.session_state.options.index('A')]}**: {exam.answer}"
         )
 else:
     st.text(" ")
     st.text(" ")
 
+
 left, right = st.columns(2)
-if left.button("⬅️ Domanda precedente"):
-    back_question()
+if mode == "Esame":
+    if left.button("⬅️ Domanda precedente"):
+        exam.back_question(st.session_state)
+        st.rerun()
 if right.button("➡️ Prossima domanda"):
-    next_question()
+    exam.next_question(st.session_state)
+    st.rerun()
