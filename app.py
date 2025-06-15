@@ -13,7 +13,6 @@ BASE_DIR = os.getenv("BASE_DIR", "/root")
 def load_data(what):
     # Sostituisci con il tuo percorso
     return pickle.load(
-        # open(f"/Users/francesconazzaro/Downloads/quesiti_{what}.pk", "rb")
         open(os.path.join(BASE_DIR, f"quesiti_{what}.pk"), "rb")
     )
 
@@ -25,6 +24,10 @@ def load_question():
     st.session_state.answered = False
     st.session_state.correct = None
 
+    if st.session_state.materia_scelta != "Tutte le materie":
+        st.session_state.dataset = st.session_state.dataset[
+            st.session_state.dataset["MATERIA"] == st.session_state.materia_scelta
+        ]
     row = st.session_state.dataset.iloc[st.session_state.current_index]
     options = letters.copy()
     random.shuffle(options)
@@ -57,14 +60,24 @@ def update_index():
 istruttori = load_data("istruttori")
 funzionari = load_data("funzionari")
 
-st.session_state.dataset_name = st.segmented_control(
-    "Seleziona il tipo di domanda",
+left, right = st.columns(2)
+st.session_state.dataset_name = left.segmented_control(
+    "Seleziona il tipo Concorso",
     options=["Istruttori", "Funzionari"],
     default="Istruttori",
     on_change=load_question,
 )
+
+dataset = load_data(st.session_state.dataset_name.lower())
+materia_options = dataset["MATERIA"].unique().tolist()
+st.session_state.materia_scelta = right.selectbox(
+    "Seleziona la materia",
+    options=["Tutte le materie"] + materia_options,
+    index=0,
+)
+
 index = st.select_slider(
-    "Da dove vuoi iniziare?",
+    "Da quale domanda vuoi iniziare?",
     options=range(1, 2500),
     value=1,
     on_change=update_index,
@@ -72,11 +85,11 @@ index = st.select_slider(
 )
 letters = ["A", "B", "C"]
 if st.button("🔄 Ricarica domande"):
-    st.session_state.current_index = index - 2
+    st.session_state.current_index = index - 1
     load_question()
 
 if "current_index" not in st.session_state:
-    st.session_state.current_index = index - 2
+    st.session_state.current_index = index - 1
 # if st.button("🔄 Ricarica domande"):
 # dataset = load_data(dataset_name.lower())
 
@@ -118,6 +131,9 @@ if selected and not st.session_state.answered:
         st.error(
             f"❌ Risposta sbagliata. Quella corretta era: **{letters[st.session_state.options.index('A')]}**: {st.session_state.answer}"
         )
+else:
+    st.text(" ")
+    st.text(" ")
 
 left, right = st.columns(2)
 if left.button("⬅️ Domanda precedente"):
