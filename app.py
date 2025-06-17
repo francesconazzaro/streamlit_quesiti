@@ -11,7 +11,9 @@ def update_index():
 istruttori = utils.load_data("istruttori")
 funzionari = utils.load_data("funzionari")
 
-mode = st.sidebar.segmented_control("Modalità", options=["Studio", "Esame"], default="Studio")
+mode = st.sidebar.segmented_control(
+    "Modalità", options=["Studio", "Esame"], default="Studio"
+)
 randomize = st.sidebar.checkbox("Randomizza le domande")
 
 if st.session_state.get("current_index") is None:
@@ -72,16 +74,12 @@ letters = ["A", "B", "C"]
 #     st.session_state.current_index = index - 1
 #     exam.reload_questions(st.session_state)
 
-if mode == "Esame":
-    if (
-        st.session_state.number_of_questions
-        and st.session_state.number_of_corrects / st.session_state.number_of_questions
-        > 0.7
-    ):
+if mode == "Esame" and st.session_state.number_of_questions:
+    if st.session_state.number_of_corrects / st.session_state.number_of_questions > 0.7:
         color = "green"
     else:
         color = "red"
-    result = f":{color}[{st.session_state.number_of_corrects} / {st.session_state.number_of_questions}]"
+    result = f":{color}[{st.session_state.number_of_corrects} / {st.session_state.number_of_questions}  —  {(st.session_state.number_of_corrects / st.session_state.number_of_questions * 100):.1f} %]"
 else:
     result = ""
 

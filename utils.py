@@ -7,12 +7,11 @@ import random
 BASE_DIR = os.getenv("BASE_DIR", "/root")
 LETTERS = ["A", "B", "C"]
 
+
 @st.cache_data
 def load_data(what):
     # Sostituisci con il tuo percorso
-    return pickle.load(
-        open(os.path.join(BASE_DIR, f"quesiti_{what}.pk"), "rb")
-    )
+    return pickle.load(open(os.path.join(BASE_DIR, f"quesiti_{what}.pk"), "rb"))
 
 
 def load_question(state):
@@ -23,9 +22,7 @@ def load_question(state):
     state.correct = None
 
     if state.materia_scelta != "Tutte le materie":
-        state.dataset = state.dataset[
-            state.dataset["MATERIA"] == state.materia_scelta
-        ]
+        state.dataset = state.dataset[state.dataset["MATERIA"] == state.materia_scelta]
     row = state.dataset.iloc[state.current_index]
     options = LETTERS.copy()
     random.shuffle(options)
