@@ -121,10 +121,9 @@ else:
 
 
 left, right = st.columns(2)
-if mode == "Esame":
-    if left.button("⬅️ Domanda precedente"):
-        exam.back_question(st.session_state)
-        st.rerun()
+if left.button("⬅️ Domanda precedente"):
+    exam.back_question(st.session_state)
+    st.rerun()
 if right.button("➡️ Prossima domanda"):
     exam.next_question(st.session_state)
     st.rerun()
