@@ -67,13 +67,15 @@ class Exam:
         else:
             session_state.current_index = session_state.current_index + 1
         self.load_question(session_state)
-        print(self.domanda)
+        utils.dump_session_state(session_state)
 
     def back_question(self, session_state):
         session_state.current_index = session_state.current_index - 1
         self.load_question(session_state)
+        utils.dump_session_state(session_state)
 
     def reload_questions(self, session_state):
+        utils.load_session_state(session_state, reset=True)
         self.load_question(session_state)
 
     def get_list_of_subjects(self):

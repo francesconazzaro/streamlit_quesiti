@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import json
 import pickle
 import random
 
@@ -7,11 +8,39 @@ import random
 BASE_DIR = os.getenv("BASE_DIR", "/root")
 LETTERS = ["A", "B", "C"]
 
+ITEMS = {
+    "current_index": 0,
+    "answered": False,
+    "correct": None,
+    "options": LETTERS.copy(),
+    "number_of_questions": 0,
+    "number_of_corrects": 0,
+    "subject": "Tutte le materie",
+}
 
 @st.cache_data
 def load_data(what):
     # Sostituisci con il tuo percorso
     return pickle.load(open(os.path.join(BASE_DIR, f"quesiti_{what}.pk"), "rb"))
+
+
+def dump_session_state(session_state):
+    session_dict = {}
+    for key in ITEMS:
+        session_dict[key] = getattr(session_state, key, ITEMS[key])
+    with open(os.path.join(BASE_DIR, "session_state.pkl"), "w") as f:
+        json.dump(session_dict, f)
+
+
+def load_session_state(session_state, reset=False):
+    if os.path.exists(os.path.join(BASE_DIR, "session_state.pkl")) and reset is False:
+        with open(os.path.join(BASE_DIR, "session_state.pkl"), "rb") as f:
+            new_session_state = json.load(f)
+            for key, value in new_session_state.items():
+                setattr(session_state, key, value)
+    else:
+        for key, value in ITEMS.items():
+            setattr(session_state, key, value)
 
 
 def load_question(state):

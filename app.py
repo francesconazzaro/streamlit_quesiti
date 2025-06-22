@@ -1,4 +1,5 @@
 import streamlit as st
+import pickle
 
 import utils
 import study
@@ -18,46 +19,41 @@ randomize = st.sidebar.checkbox("Randomizza le domande")
 
 if st.session_state.get("current_index") is None:
     print("Initializing session state")
-    st.session_state.current_index = 0
-    st.session_state.answered = False
-    st.session_state.correct = None
-    st.session_state.options = utils.LETTERS.copy()
-    st.session_state.number_of_questions = 0
-    st.session_state.number_of_corrects = 0
+    utils.load_session_state(st.session_state)
 
 left, right = st.columns(2)
-dataset_name = left.segmented_control(
+st.session_state.dataset_name = left.segmented_control(
     "Seleziona il tipo Concorso",
     options=["Istruttori", "Funzionari"],
     default="Istruttori",
 )
 
-if dataset_name == "Istruttori":
-    subjects = study.Exam(
+if st.session_state.dataset_name == "Istruttori":
+    data = study.Exam(
         dataset=istruttori,
-        dataset_name=dataset_name,
+        dataset_name=st.session_state.dataset_name,
         current_index=st.session_state.current_index,
     )
-elif dataset_name == "Funzionari":
-    subjects = study.Exam(
+elif st.session_state.dataset_name == "Funzionari":
+    data = study.Exam(
         dataset=funzionari,
-        dataset_name=dataset_name,
+        dataset_name=st.session_state.dataset_name,
         current_index=st.session_state.current_index,
     )
 
-subject = st.session_state.materia_scelta = right.selectbox(
+options = ["Tutte le materie"] + data.get_list_of_subjects()
+
+st.session_state.subject = st.session_state.materia_scelta = right.selectbox(
     "Seleziona la materia",
-    options=["Tutte le materie"] + subjects.get_list_of_subjects(),
-    index=0,
+    options=options,
+    index=options.index(st.session_state.subject),
 )
 
-print(subject)
-
 exam = study.Exam(
-    dataset=subjects.dataset,
-    dataset_name=subjects.dataset_name,
+    dataset=data.dataset,
+    dataset_name=data.dataset_name,
     current_index=st.session_state.current_index,
-    subject=subject,
+    subject=st.session_state.subject,
     randomize=randomize,
 )
 
@@ -70,9 +66,6 @@ index = st.select_slider(
 )
 
 letters = ["A", "B", "C"]
-# if st.button("🔄 Ricarica domande"):
-#     st.session_state.current_index = index - 1
-#     exam.reload_questions(st.session_state)
 
 if mode == "Esame" and st.session_state.number_of_questions:
     if st.session_state.number_of_corrects / st.session_state.number_of_questions > 0.7:
@@ -126,4 +119,8 @@ if left.button("⬅️ Domanda precedente"):
     st.rerun()
 if right.button("➡️ Prossima domanda"):
     exam.next_question(st.session_state)
+    st.rerun()
+
+if st.button("🔄 Ricarica domanda"):
+    exam.reload_questions(st.session_state)
     st.rerun()
