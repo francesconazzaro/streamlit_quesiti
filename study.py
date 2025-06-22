@@ -31,10 +31,10 @@ class Exam:
         if self.subject != "Tutte le materie":
             self.dataset = self.dataset[self.dataset["MATERIA"] == self.subject]
 
-        if self.current_index < len(self.dataset):
-            row = self.dataset.iloc[self.current_index]
+        if self.current_index <= self.length():
+            row = self.dataset.iloc[self.current_index - 1]
         else:
-            row = self.dataset.iloc[random.randint(0, len(self.dataset) - 1)]
+            row = self.dataset.iloc[random.randint(0, self.length() - 1)]
         options = utils.LETTERS.copy()
         random.shuffle(options)
         self.domanda = row["DOMANDA"]
@@ -45,11 +45,14 @@ class Exam:
         self.C = row.C
         self.answer = row.A
 
+    def length(self):
+        return len(self.dataset)
+
     def load_question(self, session_state):
         session_state.answered = False
         session_state.correct = None
 
-        row = self.dataset.iloc[self.current_index]
+        row = self.dataset.iloc[self.current_index - 1]
         options = utils.LETTERS.copy()
         random.shuffle(options)
         self.domanda = row["DOMANDA"]
@@ -65,12 +68,12 @@ class Exam:
         if self.randomize:
             session_state.current_index = random.randint(0, len(self.dataset) - 1)
         else:
-            session_state.current_index = session_state.current_index + 1
+            session_state.current_index = (session_state.current_index + 1) % self.length()
         self.load_question(session_state)
         utils.dump_session_state(session_state)
 
     def back_question(self, session_state):
-        session_state.current_index = session_state.current_index - 1
+        session_state.current_index = max(1, session_state.current_index - 1)
         self.load_question(session_state)
         utils.dump_session_state(session_state)
 

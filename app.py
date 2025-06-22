@@ -6,8 +6,9 @@ import study
 
 
 def update_index():
-    st.session_state.current_index = int(st.session_state.index_input) - 2
+    st.session_state.current_index = int(st.session_state.index_input)
 
+st.session_state.user = st.query_params.get("user", "Irene").lower()
 
 istruttori = utils.load_data("istruttori")
 funzionari = utils.load_data("funzionari")
@@ -57,16 +58,20 @@ exam = study.Exam(
     randomize=randomize,
 )
 
+if st.session_state.current_index > exam.length():
+    st.session_state.current_index = 1
+
 index = st.select_slider(
     "Da quale domanda vuoi iniziare?",
-    options=range(1, 2500),
-    value=1,
+    options=range(1, exam.length() + 1),
+    value=st.session_state.current_index,
     on_change=update_index,
     key="index_input",
 )
 
 letters = ["A", "B", "C"]
 
+# Statistics
 if mode == "Esame" and st.session_state.number_of_questions:
     if st.session_state.number_of_corrects / st.session_state.number_of_questions > 0.7:
         color = "green"
@@ -93,8 +98,6 @@ selected = st.radio(
     index=None,
     disabled=st.session_state.answered,
 )
-
-print(selected)
 
 if selected and not st.session_state.answered:
     answer = selected.split(":")[1]
