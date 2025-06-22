@@ -20,8 +20,16 @@ ITEMS = {
 
 @st.cache_data
 def load_data(what):
-    # Sostituisci con il tuo percorso
-    return pickle.load(open(os.path.join(BASE_DIR, f"quesiti_{what}.pk"), "rb"))
+    return pickle.load(open(os.path.join(BASE_DIR, f"{what}.pk"), "rb"))
+
+
+def load_wrong(what):
+    return pickle.load(open(os.path.join(BASE_DIR, f"wrong_answers_{what}.pk"), "rb"))
+
+
+def dump_wrong_answers(who, data):
+    with open(os.path.join(BASE_DIR, f"wrong_answers_{who}.pk"), "wb") as f:
+        pickle.dump(data, f)
 
 
 def dump_session_state(session_state):

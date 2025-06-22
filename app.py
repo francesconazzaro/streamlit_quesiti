@@ -10,8 +10,12 @@ def update_index():
 
 st.session_state.user = st.query_params.get("user", "Irene").lower()
 
-istruttori = utils.load_data("istruttori")
-funzionari = utils.load_data("funzionari")
+istruttori = utils.load_data("quesiti_istruttori")
+funzionari = utils.load_data("quesiti_funzionari")
+try:
+    wrong_answers = utils.load_wrong(st.session_state.user)
+except FileNotFoundError:
+    pass
 
 mode = st.sidebar.segmented_control(
     "Modalità", options=["Studio", "Esame"], default="Studio"
@@ -19,13 +23,12 @@ mode = st.sidebar.segmented_control(
 randomize = st.sidebar.checkbox("Randomizza le domande")
 
 if st.session_state.get("current_index") is None:
-    print("Initializing session state")
     utils.load_session_state(st.session_state)
 
 left, right = st.columns(2)
 st.session_state.dataset_name = left.segmented_control(
     "Seleziona il tipo Concorso",
-    options=["Istruttori", "Funzionari"],
+    options=["Istruttori", "Funzionari", "Sbagliate"],
     default="Istruttori",
 )
 
@@ -34,12 +37,21 @@ if st.session_state.dataset_name == "Istruttori":
         dataset=istruttori,
         dataset_name=st.session_state.dataset_name,
         current_index=st.session_state.current_index,
+        user=st.session_state.user,
     )
 elif st.session_state.dataset_name == "Funzionari":
     data = study.Exam(
         dataset=funzionari,
         dataset_name=st.session_state.dataset_name,
         current_index=st.session_state.current_index,
+        user=st.session_state.user,
+    )
+elif st.session_state.dataset_name == "Sbagliate":
+    data = study.Exam(
+        dataset=wrong_answers,
+        dataset_name=st.session_state.dataset_name,
+        current_index=st.session_state.current_index,
+        user=st.session_state.user,
     )
 
 options = ["Tutte le materie"] + data.get_list_of_subjects()
@@ -54,6 +66,7 @@ exam = study.Exam(
     dataset=data.dataset,
     dataset_name=data.dataset_name,
     current_index=st.session_state.current_index,
+    user=st.session_state.user,
     subject=st.session_state.subject,
     randomize=randomize,
 )
@@ -102,12 +115,11 @@ selected = st.radio(
 if selected and not st.session_state.answered:
     answer = selected.split(":")[1]
     st.session_state.answered = True
-    print(f"Selected answer: {answer}, {st.session_state.answered}")
     if answer.strip().lower() == exam.answer.strip().lower():
         exam.correct(st.session_state)
         st.success("✅ Risposta corretta!")
     else:
-        exam.wrong(st.session_state)
+        exam.wrong(st.session_state, answer)
         st.error(
             f"❌ Risposta sbagliata. Quella corretta era: **{letters[st.session_state.options.index('A')]}**: {exam.answer}"
         )

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import os.path
 import pandas as pd
 import random
 import utils
@@ -23,6 +24,7 @@ class Exam:
     dataset: pd.DataFrame
     dataset_name: str
     current_index: int
+    user: str
     subject: str = "Tutte le materie"
     answered: bool = False
     randomize: bool = False
@@ -89,6 +91,22 @@ class Exam:
         session_state.number_of_corrects += 1
         session_state.number_of_questions += 1
 
-    def wrong(self, session_state):
+    def wrong(self, session_state, answer):
         session_state.correct = False
         session_state.number_of_questions += 1
+        try:
+            wrong_answer = utils.load_wrong(session_state.user)
+        except Exception:
+            wrong_answer = pd.DataFrame(columns=["DOMANDA", "NUMERO", "MATERIA", "RISPOSTA", "given_answer", "A", "B", "C"])
+        # Fill the DataFrame with the wrong answer details
+        wrong_answer.loc[len(wrong_answer)] = {
+            "DOMANDA": self.domanda,
+            "NUMERO": self.numero,
+            "MATERIA": self.materia,
+            "RISPOSTA": self.answer,
+            "given_answer": answer,
+            "A": self.A,
+            "B": self.B,
+            "C": self.C
+        }
+        utils.dump_wrong_answers(session_state.user, wrong_answer)
