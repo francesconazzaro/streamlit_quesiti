@@ -99,14 +99,15 @@ class Exam:
         except Exception:
             wrong_answer = pd.DataFrame(columns=["DOMANDA", "NUMERO", "MATERIA", "RISPOSTA", "given_answer", "A", "B", "C"])
         # Fill the DataFrame with the wrong answer details
-        wrong_answer.loc[len(wrong_answer)] = {
-            "DOMANDA": self.domanda,
-            "NUMERO": self.numero,
-            "MATERIA": self.materia,
-            "RISPOSTA": self.answer,
-            "given_answer": answer,
-            "A": self.A,
-            "B": self.B,
-            "C": self.C
-        }
-        utils.dump_wrong_answers(session_state.user, wrong_answer)
+        if self.numero not in list(wrong_answer["NUMERO"]):
+            wrong_answer.loc[len(wrong_answer)] = {
+                "DOMANDA": self.domanda,
+                "NUMERO": self.numero,
+                "MATERIA": self.materia,
+                "RISPOSTA": self.answer,
+                "given_answer": answer,
+                "A": self.A,
+                "B": self.B,
+                "C": self.C
+            }
+            utils.dump_wrong_answers(session_state.user, wrong_answer)

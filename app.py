@@ -74,13 +74,16 @@ exam = study.Exam(
 if st.session_state.current_index > exam.length():
     st.session_state.current_index = 1
 
-index = st.select_slider(
-    "Da quale domanda vuoi iniziare?",
-    options=range(1, exam.length() + 1),
-    value=st.session_state.current_index,
-    on_change=update_index,
-    key="index_input",
-)
+try:
+    index = st.select_slider(
+        "Da quale domanda vuoi iniziare?",
+        options=range(1, exam.length() + 1),
+        value=st.session_state.current_index,
+        on_change=update_index,
+        key="index_input",
+    )
+except Exception:
+    pass
 
 letters = ["A", "B", "C"]
 
