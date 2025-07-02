@@ -10,8 +10,18 @@ def update_index():
 
 st.session_state.user = st.query_params.get("user", "Irene").lower()
 
-istruttori = utils.load_data("quesiti_istruttori")
-funzionari = utils.load_data("quesiti_funzionari")
+dataset_labels = {
+    "Funzionari": "quesiti_funzionari",
+    "Istruttori Polizia": "quesiti_istruttore_polizia",
+    "Funzionario Economico": "quesiti_funzionario_economico",
+    "Istruttori": "quesiti_istruttori",
+    "Sbagliate": "quesiti_sbagliate",
+}
+
+dataset = {}
+for name in ["quesiti_istruttori", "quesiti_funzionari", "quesiti_funzionario_economico", "quesiti_istruttore_polizia"]:
+    dataset[name] = utils.load_data(name)
+
 try:
     wrong_answers = utils.load_wrong(st.session_state.user)
 except FileNotFoundError:
@@ -28,31 +38,16 @@ if st.session_state.get("current_index") is None:
 left, right = st.columns(2)
 st.session_state.dataset_name = left.segmented_control(
     "Seleziona il tipo Concorso",
-    options=["Istruttori", "Funzionari", "Sbagliate"],
+    options=dataset_labels.keys(),
     default="Istruttori",
 )
 
-if st.session_state.dataset_name == "Istruttori":
-    data = study.Exam(
-        dataset=istruttori,
-        dataset_name=st.session_state.dataset_name,
-        current_index=st.session_state.current_index,
-        user=st.session_state.user,
-    )
-elif st.session_state.dataset_name == "Funzionari":
-    data = study.Exam(
-        dataset=funzionari,
-        dataset_name=st.session_state.dataset_name,
-        current_index=st.session_state.current_index,
-        user=st.session_state.user,
-    )
-elif st.session_state.dataset_name == "Sbagliate":
-    data = study.Exam(
-        dataset=wrong_answers,
-        dataset_name=st.session_state.dataset_name,
-        current_index=st.session_state.current_index,
-        user=st.session_state.user,
-    )
+data = study.Exam(
+    dataset=dataset[dataset_labels[st.session_state.dataset_name]],
+    dataset_name=st.session_state.dataset_name,
+    current_index=st.session_state.current_index,
+    user=st.session_state.user,
+)
 
 options = ["Tutte le materie"] + data.get_list_of_subjects()
 
