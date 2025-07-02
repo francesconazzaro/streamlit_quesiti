@@ -54,7 +54,7 @@ options = ["Tutte le materie"] + data.get_list_of_subjects()
 st.session_state.subject = st.session_state.materia_scelta = right.selectbox(
     "Seleziona la materia",
     options=options,
-    index=options.index(st.session_state.subject),
+    index=0,
 )
 
 exam = study.Exam(
