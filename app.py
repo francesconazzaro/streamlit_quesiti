@@ -11,6 +11,7 @@ def update_index():
 st.session_state.user = st.query_params.get("user", "Irene").lower()
 
 dataset_labels = {
+    "Concorsi passati": "quesiti_comune",
     "Funzionari": "quesiti_funzionari",
     "Istruttori Polizia": "quesiti_istruttore_polizia",
     "Funzionario Economico": "quesiti_funzionario_economico",
@@ -19,7 +20,7 @@ dataset_labels = {
 }
 
 dataset = {}
-for name in ["quesiti_istruttori", "quesiti_funzionari", "quesiti_funzionario_economico", "quesiti_istruttore_polizia"]:
+for name in ["quesiti_comune", "quesiti_istruttori", "quesiti_funzionari", "quesiti_funzionario_economico", "quesiti_istruttore_polizia"]:
     dataset[name] = utils.load_data(name)
 
 try:
@@ -113,13 +114,14 @@ selected = st.radio(
 if selected and not st.session_state.answered:
     answer = selected.split(":")[1]
     st.session_state.answered = True
-    if answer.strip().lower() == exam.answer.strip().lower():
+    correct_answer = getattr(exam, exam.correct_option)
+    if answer.strip().lower() == correct_answer.strip().lower():
         exam.correct(st.session_state)
         st.success("✅ Risposta corretta!")
     else:
         exam.wrong(st.session_state, answer)
         st.error(
-            f"❌ Risposta sbagliata. Quella corretta era: **{letters[st.session_state.options.index('A')]}**: {exam.answer}"
+            f"❌ Risposta sbagliata. Quella corretta era: **{letters[st.session_state.options.index(exam.correct_option)]}**: {correct_answer}"
         )
 else:
     st.text(" ")

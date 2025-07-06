@@ -45,6 +45,7 @@ class Exam:
         self.A = row.A
         self.B = row.B
         self.C = row.C
+        self.correct_option = row["RISPOSTA"]
         self.answer = row.A
 
     def length(self):
@@ -63,6 +64,7 @@ class Exam:
         self.A = row.A
         self.B = row.B
         self.C = row.C
+        self.correct_option = row["RISPOSTA"]
         self.answer = row.A
         session_state.options = options
 
@@ -104,7 +106,7 @@ class Exam:
                 "DOMANDA": self.domanda,
                 "NUMERO": self.numero,
                 "MATERIA": self.materia,
-                "RISPOSTA": self.answer,
+                "RISPOSTA": self.correct_option,
                 "given_answer": answer,
                 "A": self.A,
                 "B": self.B,
